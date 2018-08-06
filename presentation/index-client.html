@@ -27,16 +27,56 @@
 			<section>
 				<section data-markdown>
 					<textarea data-template>
-						# Map
+						# Helm
 					</textarea>
 				</section>
 				<section data-markdown>
 					<textarea data-template>
-						# Map
+						## What is Helm ?
 
-						* Overview
-						* Remarks and suggestions on the current map stack
-						* Proposition
+						* A package manager for Kubernetes
+						* https://helm.sh/
+						** Initiated by Kubernetes
+						** Maintained by Cloud Native Foundation
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## THREE BIG CONCEPTS
+
+						* Chart
+						* Repository
+						* Release
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Chart
+
+						A Chart is a Helm package. It contains all of the resource definitions necessary to run an application, tool, or service inside of a Kubernetes cluster.
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Repository
+
+						A Repository is the place where charts can be collected and shared.
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Release
+
+						A Release is an instance of a chart running in a Kubernetes cluster. One chart can often be installed many times into the same cluster. And each time it is installed, a new release is created.
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## global view
+
+						Helm installs charts into Kubernetes, creating a new release for each installation. And to find new charts, you can search Helm chart repositories.
+
+						https://hub.kubeapps.com/
 					</textarea>
 				</section>
 			</section>
@@ -44,419 +84,207 @@
 			<section>
 				<section data-markdown>
 					<textarea data-template>
-						## Overview
+						# Helm Charts
 					</textarea>
 				</section>
 				<section data-markdown>
 					<textarea data-template>
-						## Overview
-						![Architecture-Overview](images/Architecture-Overview-lowRes.png)
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						## Overview
-						### Map usages
-
-						* Reference Map services
-						* Basic map (cloud and in-vehicule)
-						* Map Fusion (cloud and in-vehicule)
-						* eHorizon Provider
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						## Overview
-						### Focus on some Map stack components
-						* the Reference Map Services point of view
-							* Here Connector
-							* Storage and cache
-							* HDMapMatcher
-							* HDMapServices
-					</textarea>
-				</section>
-			</section>
-
-			<section>
-				<section data-markdown>
-					<textarea data-template>
-						## Remarks and suggestions on the current map stack
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						## Remarks and suggestions on the current map stack
-						* Here-connector
-						* Storage and cache
-						* HDMapMatcher
-						* HDMapServices
-					</textarea>
-				</section>
-			</section>
-
-			<section>
-				<section data-markdown>
-					<textarea data-template>
-						### Here-connector
-					</textarea>
-				</section>
-			</section>
-			<section>
-				<section data-markdown>
-					<textarea data-template>
-						### Here-connector remarks
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### Here-connector remarks
-						#### license here
-
-						* We don't know the contract and the license Here. We can't control the financial impacts about the download strategy.
-						* No interest to cache Here tiles (as blob) if we don't have time or financial benefit.
-							* Downloading can be done systematicly from Here.
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### Here-connector remarks
-						#### Scalability
-
-						* No awareness of other running instances.
-						* No work sharing, no queue, no messaging, no bus
-						* Can't use the same keyspace cassandra storage.
-							* Will break the storage and potentially deadlocks it.
-						* Only vertical scalability is supported by adding threads.
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### Here-connector remarks
-						#### Performance on a large area
-
-						![bbox-france](images/bbox-france.png)
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### Here-connector remarks
-						#### Performance on a large area
-
-						* initial download : 6:30h
-						![initial-download](images/here-connector/here-connector-initial-download.png)
-						* download for update : 10:45h
-						![update-download](images/here-connector/here-connector-update-download.png)
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### Here-connector remarks
-						#### Performance on a large area
-
-						* memory usage (acceptable)
-						![mem-usage](images/here-connector/here-connector-mem-usage.png)
-						* network usage (can be optimized)
-						![network-usage](images/here-connector/here-connector-network-usage.png)
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### Here-connector remarks
-						#### Cassandra
-
-						* No delete, perma growth
-						* Keyspaces and tables created on runtime.
-						* Error on first update, cassandra goes on timeout.
-							* Have to tune cassandra to enable update.
-						* Is cassandra a good solution the way we use it ?
-							* Storage model looks more like a relational schema.
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### Here-connector remarks
-						#### Java Websphere
-
-						* 40sec to start the application.
-						* docker images take more than 300mb.
-						* docker container uses more than 500mb of ram.
-					</textarea>
-				</section>
-			</section>
-			<section>
-				<section data-markdown>
-					<textarea data-template>
-						### Here-connector suggestions
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### Here-connector suggestions
-						#### Functional
-
-						* finer definition of the area
-							* irregular geographical area
-							* administrative area
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### Here-connector suggestions
-						#### Scalability
-
-						![schema-here-importer](images/schema-here-importer.png) <!-- .element height="70%" width="70%" -->
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### Here-connector suggestions
-						#### Storage solution
-
-						* tiles in S3
-							* using directly the s3 of Here ?
-						* download management schema in RDS
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### Here-connector suggestions
-						#### Framework
-
-						* no more Websphere
-						* aws managed solution (lambda) / docker + kubernetes
-							* horizontal scaling
-					</textarea>
-				</section>
-			</section>
-
-			<section>
-				<section data-markdown>
-					<textarea data-template>
-						### Storage and cache
-					</textarea>
-				</section>
-			</section>
-			<section>
-				<section data-markdown>
-					<textarea data-template>
-						### Storage and cache remarks
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### Storage and cache remarks
-						#### Tile working unit
-
-						* transportation format used as working format.
-					</textarea>
-				</section>
-			</section>
-			<section>
-				<section data-markdown>
-					<textarea data-template>
-						### Storage and cache suggestions
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### Storage and cache suggestions
-						#### Better than tiles
-
-						* expand the tiles as a seamless map
-							* indexes (including spatial)
-					</textarea>
-				</section>
-			</section>
-
-			<section>
-				<section data-markdown>
-					<textarea data-template>
-						### HDMapMatcher
-					</textarea>
-				</section>
-			</section>
-			<section>
-				<section data-markdown>
-					<textarea data-template>
-						### HDMapMatcher remarks
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### HDMapMatcher remarks
-						#### Concepts
-
-						* Confusing concepts
-							* FindNearestLink = MapMatching ?
-							* FindNearestLinks = TraceMatch ?
-						* No intermediate results (all or none)
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### HDMapMatcher remarks
-						#### Scalability & Performance
-
-						* Mutex lock on cache when stressed.
-						* Work directly on gzipped protobuf binaries.
-							* Have to uncompress and open blob in memory for every search.
-							* Designed for the embedded, should be reworked in the cloud.
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### HDMapMatcher remarks
-						#### Performance
-
-						* 274 sec to match trace with 9 points.
-							<!-- * [Issue raised and rejected](http://rb00332vmx.rb.de.conti.de:8080/browse/EHCLOUD-910) -->
-						* 180 sec to match trace with 4 points
-							<!-- * [Another issue raised](http://rb00332vmx.rb.de.conti.de:8080/browse/CMAP-3) -->
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### HDMapMatcher remarks
-						#### Not deterministic
-
-						* The same request can have different responses.
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### HDMapMatcher remarks
-						#### Not deterministic
-						##### First call
+						## Tree
 
 						```
-						grpc_cli call af9443d94adc011e7a13c0267d67fa7d-1253585857.eu-central-1.elb.amazonaws.com:8080 cloud.continental.map.hdmapmatcherservice.HdMapMatcher/matchPoint --protofiles hdmapmatcherservice.proto --proto_path ./protos 'position: {coordinate: {longitude: 7.55460057658559, latitude: 44.979326555827}, heading: 30, speed: 40},maxDistanceTolerance:1000'
+						.
+						├── Chart.yaml            # Chart informations
+						├── LICENSE               # OPTIONAL: license for the chart
+						├── README.md             # OPTIONAL: Just READ IT
+						├── requirements.yaml     # OPTIONAL: listing dependencies
+						└── values.yaml           # Default values
+						├── charts                # Subs Charts.
+						├── templates
+						│   ├── _helpers.tpl      # Methods definitions
+						│   ├── deployment.yaml   # Kubernetes ressources
+						│   ├── ingress.yaml      # Kubernetes ressources
+						│   ├── NOTES.txt         # OPTIONAL: short usage notes
+						│   ├── service.yaml      # Kubernetes ressources
+						```
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## Templating
 
-						matchedPoint {
-						  linkId: 1597576913390011942
-						  offset: 1030
-						  distance: 238.80845244975791
-						  matchedPosition {
-						    latitude: 44.980739979073405
-						    longitude: 7.5523199792951345
-						    altitude: 0
-						  }
-						  direction: DIRECTION_FORWARD
-						  matchedHeading: 50.0166321
-						  linkLength: 1030
-						}
+						Helm use gotemplate to allow templating.
 
-						Rpc succeeded with OK status
+						```yaml
+						apiVersion: v1
+						kind: Service
+						metadata:
+						  name: {{ template "sample-base.fullname" . }}
+						  labels:
+						    app: {{ template "sample-base.name" . }}
+						    chart: {{ template "sample-base.chart" . }}
+						    release: {{ .Release.Name }}
+						    heritage: {{ .Release.Service }}
+						spec:
+						  type: {{ .Values.service.type }}
+						  ports:
+						    - port: {{ .Values.service.port }}
+						      targetPort: http
+						      protocol: TCP
+						      name: http
+						  selector:
+						    app: {{ template "sample-base.name" . }}
+						    release: {{ .Release.Name }}
+						```
+						<!-- .element: style="float: left; width: 48%" -->
+
+						```yaml
+						# Default values for sample-base.
+						# This is a YAML-formatted file.
+						# Declare variables to be passed into your templates.
+
+						replicaCount: 1
+
+						image:
+						  repository: nginx
+						  tag: stable
+						  pullPolicy: IfNotPresent
+
+						service:
+						  type: ClusterIP
+						  port: 80
+
+						ingress:
+						  enabled: false
+						  annotations: {}
+						    # kubernetes.io/ingress.class: nginx
+						    # kubernetes.io/tls-acme: "true"
+						  path: /
+						  hosts:
+						    - chart-example.local
+						  tls: []
+						  #  - secretName: chart-example-tls
+						  #    hosts:
+						  #      - chart-example.local
+
+						resources: {}
+						  # We usually recommend not to specify default resources and to leave this as a conscious
+						  # choice for the user. This also increases chances charts run on environments with little
+						  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+						  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+						  # limits:
+						  #  cpu: 100m
+						  #  memory: 128Mi
+						  # requests:
+						  #  cpu: 100m
+						  #  memory: 128Mi
+
+						nodeSelector: {}
+
+						tolerations: []
+
+						affinity: {}
+						```
+						<!-- .element: style="float: right; width: 48%" -->
+
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## Functions
+
+						* [go template std lib](https://golang.org/pkg/text/template/)
+						 * basic function like printf, len
+						 * operator like if, range
+						* [sprig lib](https://godoc.org/github.com/Masterminds/sprig)
+						 * advanced function like trunc, replace
+
+						https://docs.helm.sh/chart_template_guide/#template-functions-and-pipelines
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## _helpers.tpl
+
+						pipeline : chained sequence of "commands".
+
+						```go
+						{{/* vim: set filetype=mustache: */}}
+						{{/*
+						Expand the name of the chart.
+						*/}}
+						{{- define "sample-base.name" -}}
+						{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+						{{- end -}}
+
+						{{/*
+						Create a default fully qualified app name.
+						We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+						If release name contains chart name it will be used as a full name.
+						*/}}
+						{{- define "sample-base.fullname" -}}
+						{{- if .Values.fullnameOverride -}}
+						{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+						{{- else -}}
+						{{- $name := default .Chart.Name .Values.nameOverride -}}
+						{{- if contains $name .Release.Name -}}
+						{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+						{{- else -}}
+						{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+						{{- end -}}
+						{{- end -}}
+						{{- end -}}
+
+						{{/*
+						Create chart name and version as used by the chart label.
+						*/}}
+						{{- define "sample-base.chart" -}}
+						{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
+						{{- end -}}
 						```
 
+						https://docs.helm.sh/chart_template_guide/#template-functions-and-pipelines
 					</textarea>
 				</section>
 				<section data-markdown>
 					<textarea data-template>
-						### HDMapMatcher remarks
-						#### Not deterministic
-						##### Second call
+						## Requirements
+
+						* requirements.yaml
 
 						```
-						grpc_cli call af9443d94adc011e7a13c0267d67fa7d-1253585857.eu-central-1.elb.amazonaws.com:8080 cloud.continental.map.hdmapmatcherservice.HdMapMatcher/matchPoint --protofiles hdmapmatcherservice.proto --proto_path ./protos 'position: {coordinate: {longitude: 7.55460057658559, latitude: 44.979326555827}, heading: 30, speed: 40},maxDistanceTolerance:1000'
-
-						matchedPoint {
-						  linkId: 1597576922059835040
-						  offset: 0
-						  distance: 68.112565304714181
-						  matchedPosition {
-						    latitude: 44.979759966954589
-						    longitude: 7.553989989683032
-						    altitude: 0
-						  }
-						  direction: DIRECTION_BACKWARD
-						  matchedHeading: 35.563633
-						  linkLength: 421
-						}
-
-						Rpc succeeded with OK status
+						dependencies:
+						  - name: apache
+						    version: 1.2.3
+						    repository: http://example.com/charts
+						  - name: mysql
+						    version: 3.2.1
+						    repository: http://another.example.com/charts
 						```
 
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### HDMapMatcher remarks
-						#### Not deterministic
-						##### Results
+						```
+						$ helm dependency update
+						```
 
-						![result](images/1597576913390011942.JPG) <!-- .element height="30%" width="30%" -->
-						![result](images/1597576922059835040.JPG) <!-- .element height="34%" width="34%" -->
+						https://docs.helm.sh/developing_charts/#managing-dependencies-with-requirements-yaml
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## Hook
 
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### HDMapMatcher remarks
-						#### No intermediate results (Knowledge Service point of view)
+						```
+						pre-install   # before any resources are created in Kubernetes.
+						post-install  # after all resources are loaded into Kubernetes
+						pre-delete    # before any resources are deleted from Kubernetes.
+						post-delete   # after all of the release’s resources have been deleted.
+						pre-upgrade   # before any resources are loaded into Kubernetes
+						post-upgrade  # after all resources have been upgraded.
+						pre-rollback  # before any resources have been rolled back.
+						post-rollback # after all resources have been modified.
+						crd-install   # Custom Resource Definitions
+						```
 
-						* if any point of the trace is not matched then a not found error is returned
-						* if trace has a lot of points, then the fail probability is high.
-					</textarea>
-				</section>
-			</section>
-			<section>
-				<section data-markdown>
-					<textarea data-template>
-						### HDMapMatcher workarounds
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### HDMapMatcher workarounds
-						#### No intermediate results (Knowledge Service point of view)
-
-						* Split trace in chunks of 50 coordinates
-						* Tries to map match full trace with quite high radius (50m) and heading
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### HDMapMatcher workarounds
-						#### No intermediate results (Knowledge Service point of view)
-
-						* If issue occurs:
-							* if chunk contains less than 6 coordinates then tries map match chunk without heading nor speed.
-							* if chunk contains 6 coordinates or more, tries to split chunk into 2 parts and map match each part the same way
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### HDMapMatcher workarounds
-						#### No intermediate results (Knowledge Service point of view)
-
-						* If chunk could not be map matched this way then tries the exact same processing but with a smaller radius (15m)
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### HDMapMatcher workarounds
-						#### Mutex lock
-
-						* due to mutex lock on concurrent requests.
-						* create a proxy server with a queue to do one request at a time on the matcher.
-					</textarea>
-				</section>
-			</section>
-			<section>
-				<section data-markdown>
-					<textarea data-template>
-						### HDMapMatcher suggestions
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### HDMapMatcher suggestions
-						#### Algorithms
-
-						* use geographic algorithms for match point.
-						* use routing algorithms for match trace.
-						* return intermediate results (not only none or all)
-						* return confidence indices on multiple results
+						https://docs.helm.sh/developing_charts/#hooks
 					</textarea>
 				</section>
 			</section>
@@ -464,106 +292,117 @@
 			<section>
 				<section data-markdown>
 					<textarea data-template>
-						### HDMapServices
+						# Helm Lifecycle
+
+						1. User runs `helm install foo`
+						2. Chart is loaded into Tiller
+						3. After some verification, Tiller renders the foo templates
+						4. Tiller loads the resulting resources into Kubernetes
+						5. Tiller returns the release name (and other data) to the client
+						6. The client exits
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## Helm cli
+
+						```
+						$ helm --help
+						The Kubernetes package manager
+
+						To begin working with Helm, run the 'helm init' command:
+
+							$ helm init
+
+						This will install Tiller to your running Kubernetes cluster.
+						It will also set up any necessary local configuration.
+
+						Common actions from this point include:
+
+						- helm search:    search for charts
+						- helm fetch:     download a chart to your local directory to view
+						- helm install:   upload the chart to Kubernetes
+						- helm list:      list releases of charts
+
+						Environment:
+						  $HELM_HOME          set an alternative location for Helm files. By default, these are stored in ~/.helm
+						  $HELM_HOST          set an alternative Tiller host. The format is host:port
+						  $HELM_NO_PLUGINS    disable plugins. Set HELM_NO_PLUGINS=1 to disable plugins.
+						  $TILLER_NAMESPACE   set an alternative Tiller namespace (default "kube-system")
+						  $KUBECONFIG         set an alternative Kubernetes configuration file (default "~/.kube/config")
+
+						Usage:
+						  helm [command]
+
+						Available Commands:
+						  completion  Generate autocompletions script for the specified shell (bash or zsh)
+						  create      create a new chart with the given name
+						  delete      given a release name, delete the release from Kubernetes
+						  dependency  manage a chart's dependencies
+						  fetch       download a chart from a repository and (optionally) unpack it in local directory
+						  get         download a named release
+						  history     fetch release history
+						  home        displays the location of HELM_HOME
+						  init        initialize Helm on both client and server
+						  inspect     inspect a chart
+						  install     install a chart archive
+						  lint        examines a chart for possible issues
+						  list        list releases
+						  package     package a chart directory into a chart archive
+						  plugin      add, list, or remove Helm plugins
+						  repo        add, list, remove, update, and index chart repositories
+						  reset       uninstalls Tiller from a cluster
+						  rollback    roll back a release to a previous revision
+						  search      search for a keyword in charts
+						  serve       start a local http web server
+						  status      displays the status of the named release
+						  template    locally render templates
+						  test        test a release
+						  upgrade     upgrade a release
+						  verify      verify that a chart at the given path has been signed and is valid
+						  version     print the client/server version information
+
+						Flags:
+						      --debug                           enable verbose output
+						      --home string                     location of your Helm config. Overrides $HELM_HOME (default "/Users/uids3573/.helm")
+						      --host string                     address of Tiller. Overrides $HELM_HOST
+						      --kube-context string             name of the kubeconfig context to use
+						      --tiller-connection-timeout int   the duration (in seconds) Helm will wait to establish a connection to tiller (default 300)
+						      --tiller-namespace string         namespace of Tiller (default "kube-system")
+
+						Use "helm [command] --help" for more information about a command.
+						```
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						```
+						$ helm install [CHART] [flags]
+						$ helm install redis --dry-run --debug --name redis-le --namespace project-ion \
+									--set global.image.repository=docker-dev.repo.aux.be.continental.cloud \
+									--set global.image.tag=0.0.1-06becbc \
+									--set global.imagePullSecrets.name=regsecret-dev
+						```
+						```
+						$ helm upgrade [RELEASE] [CHART] [flags]
+						$ helm upgrade redis-le redis --install --dry-run --debug --namespace project-io \
+									--set global.image.repository=docker-dev.repo.aux.be.continental.cloud \
+									--set global.image.tag=0.0.1-06becbc \
+									--set global.imagePullSecrets.name=regsecret-dev
+						```
+						```
+						$ helm list [flags] [FILTER]
+						$ helm list
+						```
 					</textarea>
 				</section>
 			</section>
-			<section>
-				<section data-markdown>
-					<textarea data-template>
-						### HDMapServices remarks
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### HDMapServices remarks
-						#### Monolith
 
-						* 16 endpoints
-					</textarea>
-				</section>
-				<!--<section data-markdown>
-					<textarea data-template>
-						##### Inconsistant model
-
-						* different objects with the same name.
-					</textarea>
-				</section>-->
-			</section>
-			<section>
-				<section data-markdown>
-					<textarea data-template>
-						### HDMapServices suggestions
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						### HDMapServices suggestions
-						#### Micro-services
-
-						<!-- * Rework on the API. -->
-						* split the monolith in micro-services.
-					</textarea>
-				</section>
-			</section>
-
-			<section>
-				<section data-markdown>
-					<textarea data-template>
-						## Proposition
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						## Proposition
-						### Assumptions
-
-						* Vehicules are not Knowledge Services
-							* Different Knowledge Services have different needs (accuracy, performances, ...)
-						* Road Objects are not Observations
-							* Need plenty of observations to produce a Road object)
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						## Proposition
-						### Split the work
-
-						* Two components
-						* Two teams
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						## Proposition
-						### Split the work
-
-						* Team 1 works on the existing stack providing the maps to the vehicules
-							* RGB + TLS
-							* embedded / cloud / map
-							* No constraints coming from the "Reference Map Services"
-
-					</textarea>
-				</section>
-				<section data-markdown>
-					<textarea data-template>
-						## Proposition
-						### Split the work
-
-						* Team 2 works on the Reference Map Services
-							* RGB + TLS
-							* cloud / map / big data / devops / security
-							* Starts from existing map stack
-							* No constraints coming from the "map providing"
-
-					</textarea>
-				</section>
-			</section>
 			<section>
 				<section data-markdown>
 					<textarea data-template>
 						# Questions ?
-						# Thanks for your attention !
+						Thanks for your attention !
 					</textarea>
 				</section>
 			</section>

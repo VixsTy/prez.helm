@@ -1,0 +1,352 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<title>ITS Prez</title>
+	<link rel="stylesheet" href="css/reveal.css">
+	<link rel="stylesheet" href="css/theme/black.css">
+
+	<!-- Theme used for syntax highlighting of code -->
+	<link rel="stylesheet" href="lib/css/zenburn.css">
+
+	<!-- Printing and PDF exports -->
+	<script>
+		var link = document.createElement( 'link' );
+		link.rel = 'stylesheet';
+		link.type = 'text/css';
+		link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+		document.getElementsByTagName( 'head' )[0].appendChild( link );
+	</script>
+</head>
+<body>
+	<div class="reveal">
+		<div class="slides">
+
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						# Helm
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## What is Helm ?
+
+						* A package manager for Kubernetes
+						* https://helm.sh/
+						** Initiated by Kubernetes
+						** Maintained by Cloud Native Foundation
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## THREE BIG CONCEPTS
+
+						* Chart
+						* Repository
+						* Release
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Chart
+
+						A Chart is a Helm package. It contains all of the resource definitions necessary to run an application, tool, or service inside of a Kubernetes cluster.
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Repository
+
+						A Repository is the place where charts can be collected and shared.
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Release
+
+						A Release is an instance of a chart running in a Kubernetes cluster. One chart can often be installed many times into the same cluster. And each time it is installed, a new release is created.
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## global view
+
+						Helm installs charts into Kubernetes, creating a new release for each installation. And to find new charts, you can search Helm chart repositories.
+
+						https://hub.kubeapps.com/
+					</textarea>
+				</section>
+			</section>
+
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						# Helm Charts
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## Tree
+
+						```
+						.
+						├── Chart.yaml            # Chart informations
+						├── LICENSE               # OPTIONAL: license for the chart
+						├── README.md             # OPTIONAL: Just READ IT
+						├── requirements.yaml     # OPTIONAL: listing dependencies
+						└── values.yaml           # Default values
+						├── charts                # Subs Charts.
+						├── templates
+						│   ├── _helpers.tpl      # Methods definitions
+						│   ├── deployment.yaml   # Kubernetes ressources
+						│   ├── ingress.yaml      # Kubernetes ressources
+						│   ├── NOTES.txt         # OPTIONAL: short usage notes
+						│   ├── service.yaml      # Kubernetes ressources
+						```
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## Templating
+
+						Helm use gotemplate to allow templating.
+
+						```yaml
+						apiVersion: v1
+						kind: Service
+						metadata:
+						  name: {{ template "sample-base.fullname" . }}
+						  labels:
+						    app: {{ template "sample-base.name" . }}
+						    chart: {{ template "sample-base.chart" . }}
+						    release: {{ .Release.Name }}
+						    heritage: {{ .Release.Service }}
+						spec:
+						  type: {{ .Values.service.type }}
+						  ports:
+						    - port: {{ .Values.service.port }}
+						      targetPort: http
+						      protocol: TCP
+						      name: http
+						  selector:
+						    app: {{ template "sample-base.name" . }}
+						    release: {{ .Release.Name }}
+						```
+						<!-- .element: style="float: left; width: 48%" -->
+
+						```yaml
+						# Default values for sample-base.
+						# This is a YAML-formatted file.
+						# Declare variables to be passed into your templates.
+
+						replicaCount: 1
+
+						image:
+						  repository: nginx
+						  tag: stable
+						  pullPolicy: IfNotPresent
+
+						service:
+						  type: ClusterIP
+						  port: 80
+
+						ingress:
+						  enabled: false
+						  annotations: {}
+						    # kubernetes.io/ingress.class: nginx
+						    # kubernetes.io/tls-acme: "true"
+						  path: /
+						  hosts:
+						    - chart-example.local
+						  tls: []
+						  #  - secretName: chart-example-tls
+						  #    hosts:
+						  #      - chart-example.local
+
+						resources: {}
+						  # We usually recommend not to specify default resources and to leave this as a conscious
+						  # choice for the user. This also increases chances charts run on environments with little
+						  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+						  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+						  # limits:
+						  #  cpu: 100m
+						  #  memory: 128Mi
+						  # requests:
+						  #  cpu: 100m
+						  #  memory: 128Mi
+
+						nodeSelector: {}
+
+						tolerations: []
+
+						affinity: {}
+						```
+						<!-- .element: style="float: right; width: 48%" -->
+
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## Functions
+
+						* [go template std lib](https://golang.org/pkg/text/template/)
+						 * basic function like printf, len
+						 * operator like if, range
+						* [sprig lib](https://godoc.org/github.com/Masterminds/sprig)
+						 * advanced function like trunc, replace
+
+						https://docs.helm.sh/chart_template_guide/#template-functions-and-pipelines
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## _helpers.tpl
+
+						pipeline : chained sequence of "commands".
+
+						```go
+						{{/* vim: set filetype=mustache: */}}
+						{{/*
+						Expand the name of the chart.
+						*/}}
+						{{- define "sample-base.name" -}}
+						{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+						{{- end -}}
+
+						{{/*
+						Create a default fully qualified app name.
+						We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+						If release name contains chart name it will be used as a full name.
+						*/}}
+						{{- define "sample-base.fullname" -}}
+						{{- if .Values.fullnameOverride -}}
+						{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+						{{- else -}}
+						{{- $name := default .Chart.Name .Values.nameOverride -}}
+						{{- if contains $name .Release.Name -}}
+						{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+						{{- else -}}
+						{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+						{{- end -}}
+						{{- end -}}
+						{{- end -}}
+
+						{{/*
+						Create chart name and version as used by the chart label.
+						*/}}
+						{{- define "sample-base.chart" -}}
+						{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
+						{{- end -}}
+						```
+
+						https://docs.helm.sh/chart_template_guide/#template-functions-and-pipelines
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## Requirements
+
+						* requirements.yaml
+
+						```
+						dependencies:
+						  - name: apache
+						    version: 1.2.3
+						    repository: http://example.com/charts
+						  - name: mysql
+						    version: 3.2.1
+						    repository: http://another.example.com/charts
+						```
+
+						```
+						$ helm dependency update
+						```
+
+						https://docs.helm.sh/developing_charts/#managing-dependencies-with-requirements-yaml
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## Hook
+
+						```
+						pre-install   # before any resources are created in Kubernetes.
+						post-install  # after all resources are loaded into Kubernetes
+						pre-delete    # before any resources are deleted from Kubernetes.
+						post-delete   # after all of the release’s resources have been deleted.
+						pre-upgrade   # before any resources are loaded into Kubernetes
+						post-upgrade  # after all resources have been upgraded.
+						pre-rollback  # before any resources have been rolled back.
+						post-rollback # after all resources have been modified.
+						crd-install   # Custom Resource Definitions
+						```
+
+						https://docs.helm.sh/developing_charts/#hooks
+					</textarea>
+				</section>
+			</section>
+
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						# Helm Lifecycle
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## Helm cli
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						1. User runs helm install foo
+						2. Chart is loaded into Tiller
+						3. After some verification, Tiller renders the foo templates
+						4. Tiller loads the resulting resources into Kubernetes
+						5. Tiller returns the release name (and other data) to the client
+						6. The client exits
+					</textarea>
+				</section>
+			</section>
+
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						# Questions ?
+						# Thanks for your attention !
+					</textarea>
+				</section>
+			</section>
+		</div>
+	</div>
+	<script src="lib/js/head.min.js"></script>
+	<script src="js/reveal.js"></script>
+
+	<script>
+	// More info about config & dependencies:
+	// - https://github.com/hakimel/reveal.js#configuration
+	// - https://github.com/hakimel/reveal.js#dependencies
+		Reveal.initialize({
+			multiplex: {
+				// Example values. To generate your own, see the socket.io server instructions.
+				secret: '15329635290455713092', // null so the clients do not have control of the master presentation
+				id: '5688297feb45344d', // id, obtained from socket.io server
+				url: 'https://reveal-js-multiplex-ccjbegmaii.now.sh' // Location of your socket.io server
+			},
+			dependencies: [
+				{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+				{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+				{ src: 'plugin/notes/notes.js', async: true },
+				{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+
+				// multiplexing - master
+				{ src: '//cdn.socket.io/socket.io-1.3.5.js', async: true },
+				{ src: 'plugin/multiplex/master.js', async: true },
+			]
+		});
+	</script>
+</body>
+</html>

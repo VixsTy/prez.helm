@@ -1,0 +1,598 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<title>ITS Prez</title>
+	<link rel="stylesheet" href="css/reveal.css">
+	<link rel="stylesheet" href="css/theme/black.css">
+
+	<!-- Theme used for syntax highlighting of code -->
+	<link rel="stylesheet" href="lib/css/zenburn.css">
+
+	<!-- Printing and PDF exports -->
+	<script>
+		var link = document.createElement( 'link' );
+		link.rel = 'stylesheet';
+		link.type = 'text/css';
+		link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+		document.getElementsByTagName( 'head' )[0].appendChild( link );
+	</script>
+</head>
+<body>
+	<div class="reveal">
+		<div class="slides">
+
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						# Map
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						# Map
+
+						* Overview
+						* Remarks and suggestions on the current map stack
+						* Proposition
+					</textarea>
+				</section>
+			</section>
+
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						## Overview
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## Overview
+						![Architecture-Overview](images/Architecture-Overview-lowRes.png)
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## Overview
+						### Map usages
+
+						* Reference Map services
+						* Basic map (cloud and in-vehicule)
+						* Map Fusion (cloud and in-vehicule)
+						* eHorizon Provider
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## Overview
+						### Focus on some Map stack components
+						* the Reference Map Services point of view
+							* Here Connector
+							* Storage and cache
+							* HDMapMatcher
+							* HDMapServices
+					</textarea>
+				</section>
+			</section>
+
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						## Remarks and suggestions on the current map stack
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## Remarks and suggestions on the current map stack
+						* Here-connector
+						* Storage and cache
+						* HDMapMatcher
+						* HDMapServices
+					</textarea>
+				</section>
+			</section>
+
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						### Here-connector
+					</textarea>
+				</section>
+			</section>
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						### Here-connector remarks
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Here-connector remarks
+						#### license here
+
+						* We don't know the contract and the license Here. We can't control the financial impacts about the download strategy.
+						* No interest to cache Here tiles (as blob) if we don't have time or financial benefit.
+							* Downloading can be done systematicly from Here.
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Here-connector remarks
+						#### Scalability
+
+						* No awareness of other running instances.
+						* No work sharing, no queue, no messaging, no bus
+						* Can't use the same keyspace cassandra storage.
+							* Will break the storage and potentially deadlocks it.
+						* Only vertical scalability is supported by adding threads.
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Here-connector remarks
+						#### Performance on a large area
+
+						![bbox-france](images/bbox-france.png)
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Here-connector remarks
+						#### Performance on a large area
+
+						* initial download : 6:30h
+						![initial-download](images/here-connector/here-connector-initial-download.png)
+						* download for update : 10:45h
+						![update-download](images/here-connector/here-connector-update-download.png)
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Here-connector remarks
+						#### Performance on a large area
+
+						* memory usage (acceptable)
+						![mem-usage](images/here-connector/here-connector-mem-usage.png)
+						* network usage (can be optimized)
+						![network-usage](images/here-connector/here-connector-network-usage.png)
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Here-connector remarks
+						#### Cassandra
+
+						* No delete, perma growth
+						* Keyspaces and tables created on runtime.
+						* Error on first update, cassandra goes on timeout.
+							* Have to tune cassandra to enable update.
+						* Is cassandra a good solution the way we use it ?
+							* Storage model looks more like a relational schema.
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Here-connector remarks
+						#### Java Websphere
+
+						* 40sec to start the application.
+						* docker images take more than 300mb.
+						* docker container uses more than 500mb of ram.
+					</textarea>
+				</section>
+			</section>
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						### Here-connector suggestions
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Here-connector suggestions
+						#### Functional
+
+						* finer definition of the area
+							* irregular geographical area
+							* administrative area
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Here-connector suggestions
+						#### Scalability
+
+						![schema-here-importer](images/schema-here-importer.png) <!-- .element height="70%" width="70%" -->
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Here-connector suggestions
+						#### Storage solution
+
+						* tiles in S3
+							* using directly the s3 of Here ?
+						* download management schema in RDS
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Here-connector suggestions
+						#### Framework
+
+						* no more Websphere
+						* aws managed solution (lambda) / docker + kubernetes
+							* horizontal scaling
+					</textarea>
+				</section>
+			</section>
+
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						### Storage and cache
+					</textarea>
+				</section>
+			</section>
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						### Storage and cache remarks
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Storage and cache remarks
+						#### Tile working unit
+
+						* transportation format used as working format.
+					</textarea>
+				</section>
+			</section>
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						### Storage and cache suggestions
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Storage and cache suggestions
+						#### Better than tiles
+
+						* expand the tiles as a seamless map
+							* indexes (including spatial)
+					</textarea>
+				</section>
+			</section>
+
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapMatcher
+					</textarea>
+				</section>
+			</section>
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapMatcher remarks
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapMatcher remarks
+						#### Concepts
+
+						* Confusing concepts
+							* FindNearestLink = MapMatching ?
+							* FindNearestLinks = TraceMatch ?
+						* No intermediate results (all or none)
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapMatcher remarks
+						#### Scalability & Performance
+
+						* Mutex lock on cache when stressed.
+						* Work directly on gzipped protobuf binaries.
+							* Have to uncompress and open blob in memory for every search.
+							* Designed for the embedded, should be reworked in the cloud.
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapMatcher remarks
+						#### Performance
+
+						* 274 sec to match trace with 9 points.
+							<!-- * [Issue raised and rejected](http://rb00332vmx.rb.de.conti.de:8080/browse/EHCLOUD-910) -->
+						* 180 sec to match trace with 4 points
+							<!-- * [Another issue raised](http://rb00332vmx.rb.de.conti.de:8080/browse/CMAP-3) -->
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapMatcher remarks
+						#### Not deterministic
+
+						* The same request can have different responses.
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapMatcher remarks
+						#### Not deterministic
+						##### First call
+
+						```
+						grpc_cli call af9443d94adc011e7a13c0267d67fa7d-1253585857.eu-central-1.elb.amazonaws.com:8080 cloud.continental.map.hdmapmatcherservice.HdMapMatcher/matchPoint --protofiles hdmapmatcherservice.proto --proto_path ./protos 'position: {coordinate: {longitude: 7.55460057658559, latitude: 44.979326555827}, heading: 30, speed: 40},maxDistanceTolerance:1000'
+
+						matchedPoint {
+						  linkId: 1597576913390011942
+						  offset: 1030
+						  distance: 238.80845244975791
+						  matchedPosition {
+						    latitude: 44.980739979073405
+						    longitude: 7.5523199792951345
+						    altitude: 0
+						  }
+						  direction: DIRECTION_FORWARD
+						  matchedHeading: 50.0166321
+						  linkLength: 1030
+						}
+
+						Rpc succeeded with OK status
+						```
+
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapMatcher remarks
+						#### Not deterministic
+						##### Second call
+
+						```
+						grpc_cli call af9443d94adc011e7a13c0267d67fa7d-1253585857.eu-central-1.elb.amazonaws.com:8080 cloud.continental.map.hdmapmatcherservice.HdMapMatcher/matchPoint --protofiles hdmapmatcherservice.proto --proto_path ./protos 'position: {coordinate: {longitude: 7.55460057658559, latitude: 44.979326555827}, heading: 30, speed: 40},maxDistanceTolerance:1000'
+
+						matchedPoint {
+						  linkId: 1597576922059835040
+						  offset: 0
+						  distance: 68.112565304714181
+						  matchedPosition {
+						    latitude: 44.979759966954589
+						    longitude: 7.553989989683032
+						    altitude: 0
+						  }
+						  direction: DIRECTION_BACKWARD
+						  matchedHeading: 35.563633
+						  linkLength: 421
+						}
+
+						Rpc succeeded with OK status
+						```
+
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapMatcher remarks
+						#### Not deterministic
+						##### Results
+
+						![result](images/1597576913390011942.JPG) <!-- .element height="30%" width="30%" -->
+						![result](images/1597576922059835040.JPG) <!-- .element height="34%" width="34%" -->
+
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapMatcher remarks
+						#### No intermediate results (Knowledge Service point of view)
+
+						* if any point of the trace is not matched then a not found error is returned
+						* if trace has a lot of points, then the fail probability is high.
+					</textarea>
+				</section>
+			</section>
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapMatcher workarounds
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapMatcher workarounds
+						#### No intermediate results (Knowledge Service point of view)
+
+						* Split trace in chunks of 50 coordinates
+						* Tries to map match full trace with quite high radius (50m) and heading
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapMatcher workarounds
+						#### No intermediate results (Knowledge Service point of view)
+
+						* If issue occurs:
+							* if chunk contains less than 6 coordinates then tries map match chunk without heading nor speed.
+							* if chunk contains 6 coordinates or more, tries to split chunk into 2 parts and map match each part the same way
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapMatcher workarounds
+						#### No intermediate results (Knowledge Service point of view)
+
+						* If chunk could not be map matched this way then tries the exact same processing but with a smaller radius (15m)
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapMatcher workarounds
+						#### Mutex lock
+
+						* due to mutex lock on concurrent requests.
+						* create a proxy server with a queue to do one request at a time on the matcher.
+					</textarea>
+				</section>
+			</section>
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapMatcher suggestions
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapMatcher suggestions
+						#### Algorithms
+
+						* use geographic algorithms for match point.
+						* use routing algorithms for match trace.
+						* return intermediate results (not only none or all)
+						* return confidence indices on multiple results
+					</textarea>
+				</section>
+			</section>
+
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapServices
+					</textarea>
+				</section>
+			</section>
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapServices remarks
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapServices remarks
+						#### Monolith
+
+						* 16 endpoints
+					</textarea>
+				</section>
+				<!--<section data-markdown>
+					<textarea data-template>
+						##### Inconsistant model
+
+						* different objects with the same name.
+					</textarea>
+				</section>-->
+			</section>
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapServices suggestions
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### HDMapServices suggestions
+						#### Micro-services
+
+						<!-- * Rework on the API. -->
+						* split the monolith in micro-services.
+					</textarea>
+				</section>
+			</section>
+
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						## Proposition
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## Proposition
+						### Assumptions
+
+						* Vehicules are not Knowledge Services
+							* Different Knowledge Services have different needs (accuracy, performances, ...)
+						* Road Objects are not Observations
+							* Need plenty of observations to produce a Road object)
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## Proposition
+						### Split the work
+
+						* Two components
+						* Two teams
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## Proposition
+						### Split the work
+
+						* Team 1 works on the existing stack providing the maps to the vehicules
+							* RGB + TLS
+							* embedded / cloud / map
+							* No constraints coming from the "Reference Map Services"
+
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## Proposition
+						### Split the work
+
+						* Team 2 works on the Reference Map Services
+							* RGB + TLS
+							* cloud / map / big data / devops / security
+							* Starts from existing map stack
+							* No constraints coming from the "map providing"
+
+					</textarea>
+				</section>
+			</section>
+			<section>
+				<section data-markdown>
+					<textarea data-template>
+						# Questions ?
+						# Thanks for your attention !
+					</textarea>
+				</section>
+			</section>
+		</div>
+	</div>
+	<script src="lib/js/head.min.js"></script>
+	<script src="js/reveal.js"></script>
+
+	<script>
+	// More info about config & dependencies:
+	// - https://github.com/hakimel/reveal.js#configuration
+	// - https://github.com/hakimel/reveal.js#dependencies
+		Reveal.initialize({
+			multiplex: {
+				// Example values. To generate your own, see the socket.io server instructions.
+				secret: null, // null so the clients do not have control of the master presentation
+				id: '5688297feb45344d', // id, obtained from socket.io server
+				url: 'https://reveal-js-multiplex-ccjbegmaii.now.sh' // Location of your socket.io server
+			},
+			dependencies: [
+				{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+				{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+				{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+
+				// multiplexing - client
+				{ src: '//cdn.socket.io/socket.io-1.3.5.js', async: true },
+				{ src: 'plugin/multiplex/client.js', async: true },
+			]
+		});
+	</script>
+</body>
+</html>
